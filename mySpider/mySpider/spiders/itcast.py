@@ -33,3 +33,4 @@ class ItcastSpider(scrapy.Spider):
             yield item
 
 
+
