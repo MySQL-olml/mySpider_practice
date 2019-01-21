@@ -8,4 +8,6 @@
 
 class MyspiderPipeline(object):
     def process_item(self, item, spider):
+        #管道专门处理数据的程序
+        print(item)
         return item
