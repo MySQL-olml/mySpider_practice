@@ -69,34 +69,30 @@ class SuningSpider(scrapy.Spider):
             )
 
         #列表页翻页
-        # 前半部分数据的url地址
+        #前半部分数据的url地址
         next_url_1 = "https://list.suning.com/emall/showProductList.do?ci={}&pg=03&cp={}&il=0&iy=0&adNumber=0&n=1&ch=4&sesab=ABBAAA&id=IDENTIFYING&cc=010"
-        # 后半部分数据的url地址
+        #后半部分数据的url地址
         next_url_2 = "https://list.suning.com/emall/showProductList.do?ci={}&pg=03&cp={}&il=0&iy=0&adNumber=0&n=1&ch=4&sesab=ABBAAA&id=IDENTIFYING&cc=010&paging=1&sub=0"
         ci = item["s_href"].split("-")[1]
-
-        #获取当前页
+        #当前的页码数
         current_page = re.findall('param.currentPage = "(.*?)";',response.body.decode())[0]
-        #获取总页数
+        #总的页码数
         total_page = re.findall('param.pageNumbers = "(.*?)";',response.body.decode())[0]
-        #设置翻页条件
-        if int(current_page) < int(total_page):
-            #构造前半部分的请求
-            next_page = int(current_page) + 1
-            next_url_1 = next_url_1.format(ci,next_page)
+        if int(current_page)<int(total_page):
+            next_page_num = int(current_page) + 1
+            next_url_1 = next_url_1.format(ci,next_page_num)  #组装前半部分URL
             yield scrapy.Request(
                 next_url_1,
                 callback=self.parse_book_list,
                 meta = {"item":item}
             )
-            #构造后半部分的请求
-            next_url_2 = next_url_2.format(ci,next_page)
+            #构造后半部分数据的请求
+            next_url_2 = next_url_2.format(ci,next_page_num)
             yield scrapy.Request(
                 next_url_2,
                 callback=self.parse_book_list,
-                meta={"item": item}
+                meta = {"item":item}
             )
-
 
     def parse_book_detail(self,response):#处理图书详情页内容
         item = response.meta["item"]
@@ -110,11 +106,11 @@ class SuningSpider(scrapy.Spider):
             price_url = price_temp_url.format(p1,p1,p3,p4,p5)
             yield scrapy.Request(
                 price_url,
-                callback=self.parse_book_price,
+                callback=self.parse_book_pirce,
                 meta={"item":item}
             )
 
-    def parse_book_price(self,response): #提取图书的价格
+    def parse_book_pirce(self,response): #提取图书的价格
         item = response.meta["item"]
         item["book_price"] = re.findall('"netPrice":"(.*?)"',response.body.decode())[0]
         print(item)
